@@ -1,0 +1,38 @@
+---
+- hosts: al2lepp
+  gather_facts: yes
+
+  vars_files:
+    - vars/main.yml
+
+  roles:
+    - timezone
+    - ssl
+    - amzn-extras
+    - frontend
+    - nginx
+    - postgres
+    - php
+    - composer
+    - git
+    - vim
+    - zsh
+
+  tasks:
+    - name: Make sure nginx is started
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
+
+    - name: Make sure php-fpm is started
+      service:
+        name: php-fpm
+        state: restarted
+        enabled: yes
+
+    - name: Make sure redis is started
+      service:
+        name: redis
+        state: restarted
+        enabled: yes

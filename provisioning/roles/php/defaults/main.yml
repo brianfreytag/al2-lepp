@@ -1,0 +1,22 @@
+---
+php_packages: []
+php_dir_conf: "/etc/"
+php_expose_php: On
+php_max_execution_time: 60
+php_max_input_time: 60
+php_memory_limit: 256M
+php_error_reporting: E_ALL & ~E_DEPRECATED & ~E_STRICT
+php_display_errors: On
+php_display_startup_errors: On
+php_log_errors: On
+php_html_errors: On
+php_post_max_size: 500M
+php_file_uploads: On
+php_max_filesize: 500M
+php_max_file_uploads: 20
+php_date_timezone: America/New_York
+phpfpm_dir_log: "/var/log/php-fpm"
+phpfpm_dir_conf: "/etc"
+phpfpm_dir_socket: "/var/run/php-fpm"
+
+phpfpm_pools: "{{ phpfpm_pools }}"

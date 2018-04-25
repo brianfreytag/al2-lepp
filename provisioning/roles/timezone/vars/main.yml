@@ -1,0 +1,4 @@
+---
+clock_path: /etc/sysconfig/clock
+zone_info_path: /usr/shar/zoneinfo
+localtime_path: /etc/localtime

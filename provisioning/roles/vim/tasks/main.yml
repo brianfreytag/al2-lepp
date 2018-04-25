@@ -1,0 +1,50 @@
+---
+  - name: Create Directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    become: yes
+    become_user: vagrant
+    with_items:
+      - '/home/vagrant/.vim'
+      - '/home/vagrant/.vim/autoload'
+      - '/home/vagrant/.vim/plugged'
+
+  - name: Install vim-plug
+    get_url:
+      url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      dest: /home/vagrant/.vim/autoload/plug.vim
+    become: yes
+    become_user: vagrant
+
+  - name: Copy over .vimrc file
+    template:
+      src: vimrc.j2
+      dest: /home/vagrant/.vimrc
+    become: yes
+    become_user: vagrant
+
+  - name: Install vim plugins
+    command: vim +PlugInstall +qa
+    become: yes
+    become_user: vagrant
+
+  - name: Add darcula Theme to .vimrc
+    lineinfile:
+      path: /home/vagrant/.vimrc
+      state: present
+      regexp: '^color darcula'
+      line: 'color darcula'
+
+  - name: Symlink Stuff
+    file:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      owner: root
+      group: root
+      state: link
+    with_items:
+      - { src: '/home/vagrant/.vimrc', dest: '/root/.vimrc' }
+      - { src: '/home/vagrant/.vim', dest: '/root/.vim' }
+

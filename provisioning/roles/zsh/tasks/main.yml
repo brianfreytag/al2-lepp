@@ -1,0 +1,15 @@
+---
+  - name: Install zsh
+    yum: name=zsh state=present
+
+  - name: Download oh-my-zsh for vagrant
+    git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/vagrant/.oh-my-zsh
+    become: yes
+    become_user: vagrant
+
+  - name: Move .zshrc file for vagrant
+    template:
+      src: zshrc.j2
+      dest: /home/vagrant/.zshrc
+    become: yes
+    become_user: vagrant

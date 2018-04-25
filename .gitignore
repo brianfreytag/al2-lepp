@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+.vagrant/
+shared/*
+!shared/.gitkeep
+provisioning/playbook.retry

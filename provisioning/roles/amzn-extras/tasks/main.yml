@@ -1,0 +1,5 @@
+---
+  - name: Install Amazon Linux Extras Packages
+    when: amzn_extras is defined and amzn_extras|length > 0
+    command: amazon-linux-extras install {{ item }}
+    with_items: "{{ amzn_extras }}"

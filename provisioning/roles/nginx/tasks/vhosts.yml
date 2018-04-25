@@ -1,0 +1,23 @@
+---
+- name: Remove default nginx vhost config file (if configured).
+  file:
+    path: "{{ nginx_default_vhost_path }}"
+    state: absent
+  when: nginx_remove_default_vhost
+  notify: restart nginx
+
+- name: Add managed serverblocks config files (if any vhosts are configured).
+  template:
+    src: serverblocks.j2
+    dest: "{{ nginx_vhost_path }}/{{item.name}}.conf"
+    mode: 0644
+  when: server_blocks
+  with_items: "{{ server_blocks }}"
+  notify: restart nginx
+
+- name: Remove managed vhost config file (if no vhosts are configured).
+  file:
+    path: "{{ nginx_vhost_path }}/vhosts.conf"
+    state: absent
+  when: not server_blocks
+  notify: restart nginx

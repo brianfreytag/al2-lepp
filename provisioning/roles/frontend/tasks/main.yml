@@ -1,0 +1,28 @@
+---
+  - name: Install Prerequisites
+    when: frontend_prerequisites is defined and frontend_prerequisites|length > 0
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ frontend_prerequisites }}"
+
+  - name: Run Node.js Setup Script
+    shell: curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
+    args:
+        warn: false # set warn=false to prevent warning
+
+  - name: Install Node.js
+    yum:
+      name: nodejs
+      state: present
+
+  - name: Retrieve Yarn Repo
+    get_url:
+      url: https://dl.yarnpkg.com/rpm/yarn.repo
+      dest: /etc/yum.repos.d/yarn.repo
+
+  - name: Install yarn
+    yum: name=yarn state=present
+
+  - name: Install required Yarn Modules
+    command: yarn global add sass-loader node-sass

@@ -1,0 +1,25 @@
+[user]
+    # these are about the most basic and should pretty much always exist
+    email = {{ git_user_email_address }}
+    name  = {{ git_user_name }}
+[core]
+    editor = vim
+    # if you use windows
+    #autocrlf = true
+
+    # tells git to ignore file permission changes
+    #filemode = false
+
+    # lets you tweak the default pager
+    # see `man less` for the meaning of these flags
+    #pager = 'less -FRSX'
+
+	preloadindex = true
+[color]
+    # this turns on default colors for many commands
+    # or you can customize specific colors per command
+    ui = auto
+
+[push]
+    # lets you say `git push origin` to push the current branch
+    default = current

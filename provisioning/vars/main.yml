@@ -1,0 +1,97 @@
+---
+system_timezone: "America/Detroit"
+
+composer_github_token: "{{ lookup('env', 'COMPOSER_GITHUB_TOKEN') }}"
+
+git_user_email_address: "{{ lookup('env', 'GITHUB_USER_EMAIL_ADDRESS') }}"
+git_user_name: "{{ lookup('env', 'GITHUB_USER_NAME') }}"
+git_repos_name: "{{ lookup('env', 'GITHUB_REPOS_NAME') }}"
+
+#
+# SSL Configurations
+#
+ssl_certs_locality: "Detroit"
+ssl_certs_organization: "My Company"
+ssl_certs_state: "Michigan"
+ssl_certs_path_owner: "vagrant"
+ssl_certs_path_group: "vagrant"
+
+#
+# Amazon Linux 2 Extras Packages
+#
+amzn_extras:
+  - ansible2
+  - nginx1.12
+  - postgresql9.6
+  - python3
+  - redis4.0
+  - vim
+  - nano
+  - php7.2
+  - memcached1.5
+
+#
+# PHP Packages
+#
+php_packages:
+  - php-common
+  - php-devel
+  - php-fpm
+  - php-gd
+  - php-intl
+  - php-json
+  - php-ldap
+  - php-mbstring
+  - php-opcache
+  - php-pear
+  - php-pgsql
+  - php-pdo
+  - php-soap
+  - php-xml
+  - zlib-devel
+
+#
+# Nginx Server Blocks
+#
+server_blocks:
+  - {
+      name: "dev",
+      listen: "80", # default: "80 default_server"
+      server_name: "dev.test", # default: N/A
+      root: "/var/www/dev/public", # default: N/A
+      socket_dir: "/var/run/php-fpm",
+      site: "dev",
+      error_log: "{{ nginx_dir_log }}/dev/error.log {{ nginx_error_log_level }}",
+      access_log: "{{ nginx_dir_log }}/dev/access.log {{ nginx_log_format_name }}",
+      ssl: "on",
+      ssl_cert_path: "/etc/ssl/al2lepp/dev.crt",
+      ssl_key_path: "/etc/ssl/al2lepp/dev.key",
+    }
+
+phpfpm_pools:
+  - {
+        hostname: "dev",
+        user: "www-data",
+        group: "www-data",
+        pm: "dynamic",
+        conf_dir: "{{ phpfpm_dir_conf }}",
+        socket_dir: "{{ phpfpm_dir_socket }}",
+        pm_max_children: 5,
+        pm_start_servers: 2,
+        pm_min_spare_servers: 1,
+        pm_max_spare_servers: 3,
+        pm_process_idle_timeout: 3600,
+        pm_max_requests: 0,
+      }
+
+#
+# Domains
+#
+domains:
+  - dev
+
+#
+# DB Domains
+#
+db_domains:
+  - dev

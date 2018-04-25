@@ -1,0 +1,105 @@
+---
+- name: Install Postgresql Packages
+  yum: name={{item}} state=present
+  with_items:
+      - postgresql
+      - postgresql-server
+      - postgresql-devel
+      - python-psycopg2
+
+- name: Initiate database
+  command: service postgresql initdb creates=/var/lib/pgsql/data/postgresql.conf
+  args:
+      warn: false # set warn=false to prevent warning
+
+- name: Copy over postgresql server certificate
+  template:
+    src: server.crt
+    dest: "/var/lib/pgsql/data/server.crt"
+    owner: postgres
+    group: postgres
+    force: yes
+    mode: 0600
+
+- name: Copy over postgresql server csr
+  template:
+    src: server.csr
+    dest: "/var/lib/pgsql/data/server.csr"
+    owner: postgres
+    group: postgres
+    force: yes
+    mode: 0600
+
+- name: Copy over postgresql server key
+  template:
+    src: server.key
+    dest: "/var/lib/pgsql/data/server.key"
+    owner: postgres
+    group: postgres
+    force: yes
+    mode: 0600
+
+- name: update postgres db configuration
+  template:
+    src: postgresql.conf.j2
+    dest: "/var/lib/pgsql/data/postgresql.conf"
+    owner: postgres
+    group: postgres
+    force: yes
+    mode: 0644
+  notify: restart postgresql
+
+- name: Start PostgreSQL and enable at boot
+  service: name=postgresql
+    enabled=yes
+    state=started
+
+- name: Update postgres permissions
+  template:
+    src: pg_hba.conf.j2
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
+    owner: root
+    group: root
+    force: yes
+    mode: 0644
+  notify: restart postgresql
+
+- name: Create domain_super user in postgres
+  postgresql_user: name={{item}}_super
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Create domain_db user in postgres
+  postgresql_user: name={{item}}_db password={{item}}_db
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Create domain_web user in postgres
+  postgresql_user: name={{item}}_web password={{item}}_web
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Create Databases
+  postgresql_db: name={{item}}
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Grant super role to domain_db user
+  postgresql_privs: database={{item}} roles={{item}}_db type=group objs={{item}}_super
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Grant all privileges to domain_db
+  postgresql_privs: database={{item}} roles={{item}}_db type=database privs=ALL
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Revoke connect from public
+  postgresql_privs: database={{item}} roles=PUBLIC type=database privs=CONNECT state=absent
+  with_items: "{{ db_domains }}"
+  become_user: postgres
+
+- name: Grant connect to valid users
+  postgresql_privs: database={{item}} roles={{item}}_web type=database privs=CONNECT
+  with_items: "{{ db_domains }}"
+  become_user: postgres

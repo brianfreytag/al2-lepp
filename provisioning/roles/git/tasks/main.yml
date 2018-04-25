@@ -1,0 +1,32 @@
+---
+  - name: Install git
+    yum:
+      name: git
+      state: present
+
+  - name: Install ncurses (for tig)
+    yum:
+      name: ncurses-devel
+      state: present
+
+  - name: Copy over .gitconfig file
+    template:
+      src: gitconfig.j2
+      dest: /home/vagrant/.gitconfig
+    become: yes
+    become_user: vagrant
+
+  - name: Clone Tig repo
+    git:
+      repo: https://github.com/jonas/tig.git
+      dest: /tmp/tig
+      clone: yes
+
+  - name: Build Tig
+    command: "{{ item }}"
+    args:
+      chdir: /tmp/tig
+    with_items:
+      - make prefix=/usr
+      - make install prefix=/usr
+    become: yes

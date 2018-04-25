@@ -1,0 +1,9 @@
+---
+- name: Install composer
+  get_url: url=https://getcomposer.org/composer.phar dest=/usr/bin/composer mode=0755
+
+- name: Add personal access token
+  command: composer config -g github-oauth.github.com {{composer_github_token}}
+  when: composer_github_token != ""
+  become: yes
+  become_user: vagrant

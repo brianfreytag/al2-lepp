@@ -1,0 +1,85 @@
+---
+- name: Install PHP 7.2 Packages
+  when: php_packages is defined and php_packages|length > 0
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ php_packages }}"
+
+- name: Download XDebug 2.6.0 Archive
+  unarchive:
+    src: http://xdebug.org/files/xdebug-2.6.0.tgz
+    dest: /tmp
+    creates: /tmp/xdebug-2.6.0
+    copy: no
+
+- name: Make XDebug 2.6.0
+  command: "{{ item }}"
+  args:
+    chdir: /tmp/xdebug-2.6.0
+  with_items:
+    - phpize
+    - ./configure
+    - make
+    - cp modules/xdebug.so /usr/lib64/php/modules
+
+- name: Copy php.ini
+  template:
+    src: php.ini.j2
+    dest: "{{ php_dir_conf }}/php.ini"
+
+- name: Copy xdebug configuration
+  template:
+    src: php.d/15-xdebug.ini.j2
+    dest: "{{ php_dir_conf }}/php.d/15-xdebug.ini"
+    backup: yes
+
+- name: Remove default php www php-fpm pool
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ phpfpm_dir_conf }}/php-fpm.d/www.conf"
+
+- name: Create log directory
+  file:
+    name: "{{ phpfpm_dir_log }}"
+    state: directory
+    owner: nginx
+    group: root
+    mode: 0775
+
+- name: Create php-fpm socket directory
+  file:
+    name: "{{ phpfpm_dir_socket }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create php-fpm users
+  user:
+    name: "{{ item.user }}"
+    createhome: no
+  with_items: "{{ phpfpm_pools }}"
+  when: phpfpm_pools|length > 0
+
+- name: Add nginx user to each php-fpm user's group
+  user:
+    name: "{{ nginx_user }}"
+    groups: "{{ item.user }}"
+    append: yes
+  with_items: "{{ phpfpm_pools }}"
+  when: phpfpm_pools|length > 0
+
+- name: Configure php-fpm pools
+  template:
+    src: php-fpm_pool.conf.j2
+    dest: "{{ item.conf_dir }}/php-fpm.d/{{ item.hostname }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ phpfpm_pools }}"
+  when: phpfpm_pools|length > 0
+  notify:
+      - restart php-fpm
