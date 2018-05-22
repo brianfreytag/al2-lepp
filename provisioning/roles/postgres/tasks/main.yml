@@ -7,17 +7,17 @@
       - postgresql-devel
       - python-psycopg2
 
-- name: Initiate database
-  command: service postgresql initdb creates=/var/lib/pgsql/data/postgresql.conf
+- name: Create the database cluster
+  command: postgresql-setup --initdb
   args:
-      warn: false # set warn=false to prevent warning
+    creates: "/var/lib/pgsql/data/postgresql.conf"
+  become_user: postgres
 
 - name: Copy over postgresql server certificate
   template:
     src: server.crt
     dest: "/var/lib/pgsql/data/server.crt"
     owner: postgres
-    group: postgres
     force: yes
     mode: 0600
 
@@ -26,7 +26,6 @@
     src: server.csr
     dest: "/var/lib/pgsql/data/server.csr"
     owner: postgres
-    group: postgres
     force: yes
     mode: 0600
 
@@ -35,7 +34,6 @@
     src: server.key
     dest: "/var/lib/pgsql/data/server.key"
     owner: postgres
-    group: postgres
     force: yes
     mode: 0600
 
@@ -44,22 +42,22 @@
     src: postgresql.conf.j2
     dest: "/var/lib/pgsql/data/postgresql.conf"
     owner: postgres
-    group: postgres
     force: yes
     mode: 0644
   notify: restart postgresql
 
 - name: Start PostgreSQL and enable at boot
-  service: name=postgresql
-    enabled=yes
-    state=started
+  systemd:
+    name: postgresql
+    daemon_reload: yes
+    enabled: yes
+    state: started
 
 - name: Update postgres permissions
   template:
     src: pg_hba.conf.j2
     dest: "/var/lib/pgsql/data/pg_hba.conf"
     owner: root
-    group: root
     force: yes
     mode: 0644
   notify: restart postgresql

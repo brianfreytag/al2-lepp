@@ -1,4 +1,10 @@
 ---
+- name: Update System packages
+  yum:
+    name: '*'
+    state: latest
+    update_cache: yes
+
 - name: Copy the system clock file
   template:
     src: clock.j2
