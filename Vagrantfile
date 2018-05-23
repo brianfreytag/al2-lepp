@@ -17,10 +17,6 @@ Vagrant.configure("2") do |config|
         mount_options: ['rw', 'vers=3', 'tcp', 'fsc'],
         linux__nfs_options: ['rw','no_subtree_check','all_squash','async']
 
-    config.vm.synced_folder ".", "/vagrant", type: "nfs",
-        mount_options: ['rw', 'vers=3', 'tcp', 'fsc'],
-        linux__nfs_options: ['rw','no_subtree_check','all_squash','async']
-
     config.vm.hostname = "al2lepp"
     config.vm.network :private_network, ip: "10.200.200.201"
 
