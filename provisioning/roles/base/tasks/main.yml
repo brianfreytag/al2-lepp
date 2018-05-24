@@ -1,0 +1,48 @@
+---
+- name: Install Amazon Linux Extras Packages
+  when: amzn_extras is defined and amzn_extras|length > 0
+  command: amazon-linux-extras install {{ item }}
+  with_items: "{{ amzn_extras }}"
+
+- name: Update System packages
+  yum:
+    name: '*'
+    state: latest
+    update_cache: yes
+
+- name: Install Kernel Headers
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - kernel
+    - kernel-devel
+
+- name: Install cachefilesd
+  yum:
+    name: cachefilesd
+    state: present
+
+- name: Start cachefilesd by default
+  systemd:
+      name: cachefilesd
+      daemon_reload: yes
+      state: started
+      enabled: yes
+
+- name: Copy the system clock file
+  template:
+    src: clock.j2
+    dest: "{{ clock_path }}"
+    backup: yes
+    group: root
+    owner: root
+
+- name: Create localtime Symbolic Link
+  file:
+    src: "{{ zone_info_path }}/{{ system_timezone }}"
+    dest: "{{ localtime_path }}"
+    owner: root
+    group: root
+    state: link
+    force: yes

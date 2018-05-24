@@ -6,9 +6,8 @@
     - vars/main.yml
 
   roles:
-    - timezone
+    - base
     - ssl
-    - amzn-extras
     - frontend
     - nginx
     - postgres

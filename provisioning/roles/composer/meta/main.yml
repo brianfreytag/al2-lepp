@@ -1,2 +1,2 @@
 ---
-dependencies: ['amzn-extras', 'php']
+dependencies: ['base', 'php']

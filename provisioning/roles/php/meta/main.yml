@@ -1,2 +1,2 @@
 ---
-dependencies: ['amzn-extras', 'nginx']
+dependencies: ['base', 'nginx']
