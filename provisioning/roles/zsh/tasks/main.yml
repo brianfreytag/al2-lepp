@@ -2,6 +2,9 @@
   - name: Install zsh
     yum: name=zsh state=present
 
+  - name: Install util-linux-user
+    yum: name=util-linux-user state=present
+
   - name: Download oh-my-zsh for vagrant
     git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/vagrant/.oh-my-zsh
     become: yes
